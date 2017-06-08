@@ -89,7 +89,7 @@ class Mnemosyne
      */
     private function retrieveDefaults()
     {
-        if isset($GLOBALS[$this->cache_key]) :
+        if (isset($GLOBALS[$this->cache_key])) :
             return $GLOBALS[$this->cache_key];
         elseif ($this->storage_location) :
             try {

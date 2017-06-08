@@ -12,7 +12,7 @@ function __m($key, $override, $validation = false)
 {
     $Mnemosyne = new Mnemosyne;
     try {
-        $value = $Mnemosyne->remember($key, $override, $validation = false)
+        $value = $Mnemosyne->remember($key, $override, $validation = false);
     } catch (MnemosyneException $mError) {
         $GLOBALS['Murmur_WP_Mnemosyne_default_errors'][] = $mError->getMessage();
         $value = null;
