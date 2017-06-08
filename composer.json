@@ -1,0 +1,19 @@
+{
+    "name": "murmurcreative/mnemosyne",
+    "description": "A system that for hard-coded defaults overwritten by storage-agnostic overrides.",
+    "authors": [
+        {
+            "name": "Ben Bateman",
+            "email": "ben@murmurcreative.com"
+        }
+    ],
+    "require": {
+        "symfony/yaml": "^3.3",
+        "hipparchus/pocketknife": "^0.0.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "Murmur\\WP\\": "src/"
+        }
+    }
+}
