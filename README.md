@@ -9,7 +9,7 @@ Named for the [Greek Titan of memory](https://simple.wikipedia.org/wiki/Mnemosyn
 
 It is recommended that you use Mnemosyne's convenience functions instead of accessing `Mnemosyne` directly.
 
-These functions fail silently but throw exceptions when they do. Currently these exceptions are not displayed, but are store in the PHP $GLOBALS variable: `$GLOBALS['Murmur_WP_Mnemosyne_errors']`
+These functions fail silently but throw exceptions when they do. Currently these exceptions are not displayed, but are stored in the PHP $GLOBALS variable: `$GLOBALS['Murmur_WP_Mnemosyne_errors']`
 
 ### Defaults
 
@@ -42,3 +42,7 @@ An optional callback. This is the name of a function that, if defined, will be c
 This function behaves identially to `__m()`, except that it echos the value.
 
 **Note:** Attempting to retrieve a value that is not echoable (i.e. not a string or numeric value) will throw an exception.
+
+#### Others
+
+See `src/Mnemosyne/mnemosyne_functions.php` for other functions and their documentation. Includes some tools for looking at errors and checking for overrides.
