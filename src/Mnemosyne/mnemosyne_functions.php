@@ -28,7 +28,7 @@ use \Murmur\WP\Mnemosyne\Mnemosyne;
  */
 function mns_get_value($key, $override, $validation = false)
 {
-    $Mnemosyne = new Mnemosyne;
+    $Mnemosyne = new Mnemosyne(['emit_exceptions' => true]);
     try {
         $value = $Mnemosyne->remember($key, $override, $validation);
     } catch (Exception $mError) {
@@ -40,7 +40,7 @@ function mns_get_value($key, $override, $validation = false)
 
 /**
  * i18n-y alias for mns_get_value().
- * 
+ *
  *  @since    0.1.0
  *  @see      Murmur\WP\Mnemosyne\mns_get_value()
  *  @return   mixed
@@ -78,12 +78,12 @@ function __me($key, $override, $validation = false)
 
 /**
  * Get the default value without checking for an override.
- * 
+ *
  * In some rare cases, you may want to get the default value without,
  * checking to see if an override is in place (for instance, to check
  * whether or not an override exists by comparison). This function
  * bypasses the override check.
- * 
+ *
  *  @since    0.1.1
  *  @param      string  $key
  *  @return     mixed
@@ -94,13 +94,13 @@ function mns_get_default($key)
 }
 
 /**
- * Check to see if a key is being overriden.
- * 
+ * Check to see if a key is being overridden.
+ *
  *  @since    0.1.1
  *  @see      Murmur\WP\Mnemosyne\mns_get_value()
  *  @return   bool
  */
-function mns_is_overriden($key, $override, $validation = false)
+function mns_is_overridden($key, $override, $validation = false)
 {
     $value = mns_get_value($key, $override, $validation);
     $default = mns_get_default($key);
@@ -109,5 +109,25 @@ function mns_is_overriden($key, $override, $validation = false)
         return true;
     else :
         return false;
+    endif;
+}
+
+/**
+ * Reports any errors w/ conveience functions. DEBUG ONLY.
+ *
+ * If there are any errors stored in the Mnemosyne global
+ * error cache, this prints them out nicely.
+ *
+ *  @since      0.1.1
+ *  @return     string|void
+ */
+function mns_print_errors()
+{
+    if (isset($GLOBALS['Murmur_WP_Mnemosyne_errors'])) :
+        echo '<ul class="mns_error_report">';
+        foreach ($GLOBALS['Murmur_WP_Mnemosyne_errors'] as $error) :
+            printf('<li class="mns_error_description">%s</li>', $error);
+        endforeach;
+        echo '</ul>';
     endif;
 }

@@ -38,7 +38,7 @@ class Mnemosyne
 
     /**
      * Property that contains defaults once loaded.
-     * 
+     *
      *  @since    0.1.0
      */
     private $defaults = false;
@@ -49,6 +49,12 @@ class Mnemosyne
      */
     private $cache_key = 'Murmur_WP_Mnemosyne_default_cache';
 
+    /**
+     * Set to bool true to throw Exceptions instead of
+     * handling them internally.
+     */
+    private $emit_exceptions = false;
+
 
     /**
      * Construct a Mnemosyne.
@@ -56,7 +62,7 @@ class Mnemosyne
      *  @since    0.1.0
      *  @return     void
      */
-    public function __construct()
+    public function __construct($settings = [])
     {
         try {
             $this->storage_location = $this->findStorage();
@@ -65,12 +71,39 @@ class Mnemosyne
         }
 
         $this->defaults = $this->retrieveDefaults();
+
+        try {
+            $this->applySettings($settings);
+        } catch (Exception $settingsError) {
+            $this->handleException($settingsError);
+        }
+    }
+
+    /**
+     * Apply any settings that we've passed to the class on
+     * instantiation.
+     *
+     *  @since      0.1.1
+     *  @param      array   $settings
+     *  @return     void
+     */
+    private function applySettings($settings)
+    {
+        foreach ($settings as $name => $setting) :
+            if (property_exists($this, $name)) :
+                $this->{$name} = $setting;
+            else :
+                throw new Exception(
+                    sprintf("Cannot set %s, it does not exist.", $name)
+                );
+            endif;
+        endforeach;
     }
 
     /**
      * Attempt to locate defaults file.
      *
-     *  @since    0.1.0
+     *  @since      0.1.0
      *  @return     string
      */
     private function findStorage()
@@ -83,7 +116,7 @@ class Mnemosyne
         if ($location === '') :
             throw new Exception(
                 sprintf(
-                    "Could not find a file to load at <code>%s</code>.\n",
+                    "Could not find a file to load at <code>%s</code>.",
                     $path
                 )
             );
@@ -100,13 +133,17 @@ class Mnemosyne
      * Just a wrapper, in case we want to modify exception
      * handling across the class (i.e. suppress it).
      *
-     *  @since    0.1.0
+     *  @since      0.1.0
      *  @param      object[Exception]   $Exception
      *  @return     string
      */
     private function handleException($Exception)
     {
-        echo $Exception->getMessage();
+        if ($this->emit_exceptions) :
+            throw $Exception;
+        else :
+            echo $Exception->getMessage() . '<br>';
+        endif;
     }
 
 
@@ -117,7 +154,7 @@ class Mnemosyne
      * defaults have already been loaded to avoid multiple
      * calls to the filesystem.
      *
-     *  @since    0.1.0
+     *  @since      0.1.0
      *  @return     mixed|bool
      */
     private function retrieveDefaults()
@@ -143,16 +180,16 @@ class Mnemosyne
  *
  * Throws an Exception if the file does not exist.
  *
- *  @since    0.1.0
- *  @param  string
- *  @return array
+ *  @since      0.1.0
+ *  @param      string
+ *  @return     array
  */
     private function loadFile($location)
     {
         if (!file_exists($location)) :
             throw new Exception(
                 sprintf(
-                    "The file <code>%s</code> does not exist, or is inaccessible.\n",
+                    "The file <code>%s</code> does not exist, or is inaccessible.",
                     $location
                 )
             );
@@ -168,21 +205,34 @@ class Mnemosyne
      *
      * Throws an exception if the key does not exist.
      *
-     *  @since    0.1.0
-     *  @param   string
-     *  @return string|bool
+     *  @since      0.1.0
+     *  @param      string
+     *  @return     string|bool
      */
     private function getDefault($key)
     {
         if (!isset($this->defaults[$key])) :
             throw new Exception(
                 sprintf(
-                    "The key <code>%s</code> does not exist.\n",
+                    "The key <code>%s</code> does not exist.",
                     $key
                 )
             );
         elseif (isset($this->defaults[$key])) :
-                return $this->defaults[$key];
+                $value = $this->defaults[$key];
+            if ($this->checkValue($value)) :
+                return $value;
+            else :
+                    throw new Exception(
+                        sprintf(
+                            "The default for key <code>%s</code> is of invalid type <code>%s</code>. 
+                            Must be string, int, or array.",
+                            $key,
+                            gettype($value)
+                        )
+                    );
+                    return false;
+            endif;
         else :
                 return false;
         endif;
@@ -191,47 +241,85 @@ class Mnemosyne
     /**
      * Check keys to make sure they're valid as PHP array keys.
      *
-     *  @since    0.1.0
-     *  @param  string $key
-     *  @return boolean|string
+     *  @since      0.1.0
+     *  @param      string $key
+     *  @return     boolean|string
      */
     private function checkKey($key)
     {
         return Pocketknife::safeString($key);
     }
 
+    /**
+     * Check values to make sure they're valid for our purposes.
+     *
+     * Passing a boolean value to this function will always return
+     * bool true, even if the value is bool false, because boolean
+     * is a value valid.
+     *
+     *  @since      0.1.1
+     *  @param      mixed   $value
+     *  @return     bool
+     */
+    private function checkValue($value)
+    {
+        if (is_string($value) || is_int($value) || is_array($value) || is_bool($value)) :
+            return true;
+        else :
+            return false;
+        endif;
+    }
+
 
     /**
      * Get the appropriate default or override for a key.
      *
-     *  @since    0.1.0
-     *  @param  string               $key
-     *  @param  string|array|integer $override
-     *  @param  string               $validate
-     *  @return string|array|integer
+     *  @since      0.1.0
+     *  @param      string               $key
+     *  @param      string|array|integer $override
+     *  @param      string               $validate
+     *  @return     string|array|integer
      */
     public function remember($key, $override, $validate = false)
     {
-        if (!is_bool($override) && !(is_string($override) || is_int($override) || is_array($override))) :
-            throw new Exception(
-                "The supplied override is not an acceptable type (string, int, or array).\n"
-            );
-        endif;
+        try {
+            if (!is_string($key)) :
+                throw new Exception(
+                    sprintf(
+                        "The supplied key is of type <code>%s</code>. Must be a string.",
+                        gettype($key)
+                    )
+                );
+            endif;
 
-        if (!is_string($key)) :
-            throw new Exception(
-                "The supplied key is not a string.\n"
-            );
-        endif;
+            if (!$this->checkKey($key)) :
+                throw new Exception(
+                    sprintf(
+                        "The key <code>%s</code> is not a valid key (only alphanumeric and underscores allowed).",
+                        $key
+                    )
+                );
+            endif;
+        } catch (Exception $keyError) {
+            $this->handleException($keyError);
+            return;
+        }
 
-        if (!$this->checkKey($key)) :
-            throw new Exception(
-                sprintf(
-                    "The key %s is not a valid key (only alphanumeric and underscores allowed).\n",
-                    $key
-                )
-            );
-        endif;
+        try {
+            if (!$this->checkValue($override)) :
+                throw new Exception(
+                    sprintf(
+                        "The override for key <code>%s</code> is of invalid type <code>%s</code>. 
+                        Must be string, int, or array.",
+                        $key,
+                        gettype($override)
+                    )
+                );
+            endif;
+        } catch (Exception $overrideError) {
+            $this->handleException($overrideError);
+            return;
+        }
 
         if (is_string($validate)) :
             $test = call_user_func($validate, $override, $key);
