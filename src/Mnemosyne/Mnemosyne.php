@@ -53,7 +53,7 @@ class Mnemosyne
         /*
         * Load defaults.
          */
-        $location = locate_template(
+        $location = \locate_template(
             apply_filters(
                 'Murmur/WP/Mnemosyne/storage_location',
                 'app/defaults.mnemosyne.yaml'
