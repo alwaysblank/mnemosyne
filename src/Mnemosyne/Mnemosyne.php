@@ -11,9 +11,9 @@
  * PHP version 7
  *
  *  @package  Murmur\WP\Mnemosyne
- *  @author   Squiz Pty Ltd <products@squiz.net>
+ *  @author   Ben Martinez-Bateman <ben@murmurcreative.com>
  *  @link     https://bitbucket.org/murmurcreative/mnemosyne
- *  @since    0.0.1
+ *  @since    0.1.0
  */
 
 namespace Murmur\WP\Mnemosyne;
@@ -25,19 +25,21 @@ use \Hipparchus\Pocketknife;
 /**
  * Contains the core Mnemosyne functionality.
  *
- *  @author   Ben Martinez-Bateman <ben@murmurcreative.com>
- *  @since    0.0.1
+ *  @since    0.1.0
  */
 class Mnemosyne
 {
 
     /**
      * Absolute path to a .php file containing our defaults.
+     *  @since    0.1.0
      */
     private $storage_location = false;
 
     /**
      * Property that contains defaults once loaded.
+     * 
+     *  @since    0.1.0
      */
     private $defaults = false;
 
@@ -51,6 +53,7 @@ class Mnemosyne
     /**
      * Construct a Mnemosyne.
      *
+     *  @since    0.1.0
      *  @return     void
      */
     public function __construct()
@@ -67,6 +70,7 @@ class Mnemosyne
     /**
      * Attempt to locate defaults file.
      *
+     *  @since    0.1.0
      *  @return     string
      */
     private function findStorage()
@@ -96,6 +100,7 @@ class Mnemosyne
      * Just a wrapper, in case we want to modify exception
      * handling across the class (i.e. suppress it).
      *
+     *  @since    0.1.0
      *  @param      object[Exception]   $Exception
      *  @return     string
      */
@@ -112,6 +117,7 @@ class Mnemosyne
      * defaults have already been loaded to avoid multiple
      * calls to the filesystem.
      *
+     *  @since    0.1.0
      *  @return     mixed|bool
      */
     private function retrieveDefaults()
@@ -137,6 +143,7 @@ class Mnemosyne
  *
  * Throws an Exception if the file does not exist.
  *
+ *  @since    0.1.0
  *  @param  string
  *  @return array
  */
@@ -161,6 +168,7 @@ class Mnemosyne
      *
      * Throws an exception if the key does not exist.
      *
+     *  @since    0.1.0
      *  @param   string
      *  @return string|bool
      */
@@ -183,6 +191,7 @@ class Mnemosyne
     /**
      * Check keys to make sure they're valid as PHP array keys.
      *
+     *  @since    0.1.0
      *  @param  string $key
      *  @return boolean|string
      */
@@ -195,6 +204,7 @@ class Mnemosyne
     /**
      * Get the appropriate default or override for a key.
      *
+     *  @since    0.1.0
      *  @param  string               $key
      *  @param  string|array|integer $override
      *  @param  string               $validate
