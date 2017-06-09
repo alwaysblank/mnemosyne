@@ -205,7 +205,11 @@ class Mnemosyne
         if ($test) :
             return $override;
         else :
-            return $this->getDefault($key);
+            try {
+                return $this->getDefault($key);
+            } catch (Exception $defaultError) {
+                $this->handleException($defaultError);
+            }
         endif;
     }
 }
