@@ -11,6 +11,12 @@ It is recommended that you use Mnemosyne's convenience functions instead of acce
 
 These functions fail silently but throw exceptions when they do. Currently these exceptions are not displayed, but are store in the PHP $GLOBALS variable: `$GLOBALS['Murmur_WP_Mnemosyne_errors']`
 
+### Defaults
+
+Set your defaults by creating a file called `defaults.mnemosyne.yaml` in `[theme]/resources/` (assuming you are using Sage 9.x). Currently Mnemosyne supports basic key:value pairs, including values that are more complex data types, such as arrays. Keys support only alphanumeric characters and underscores.
+
+If you want to place your defaults.yaml file somewhere else, or name it something else, you can use the filter `Murmur/WP/Mnemosyne/storage_location` to pass in a new location. Keep in mind that this value is passed to WordPress's `locate_template()` to get its location.
+
 #### __m()
 
 `__m($key_name, $data_source [, $validation_function])`
