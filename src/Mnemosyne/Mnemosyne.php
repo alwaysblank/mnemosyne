@@ -18,6 +18,7 @@
 
 namespace Murmur\WP\Mnemosyne;
 
+use \Exception;
 use \Symfony\Component\Yaml\Parser;
 use \Hipparchus\Pocketknife;
 
@@ -55,7 +56,7 @@ class Mnemosyne
         $location = \locate_template(
             apply_filters(
                 'Murmur/WP/Mnemosyne/storage_location',
-                'app/defaults.mnemosyne.yaml'
+                'defaults.mnemosyne.yaml'
             )
         );
 
@@ -93,7 +94,7 @@ class Mnemosyne
         elseif ($this->storage_location) :
             try {
                 $defaults = $this->loadFile($this->storage_location);
-            } catch (\Exception $fileError) {
+            } catch (Exception $fileError) {
                 $this->handleException($fileError);
             }
 
@@ -115,7 +116,7 @@ class Mnemosyne
     private function loadFile($location)
     {
         if (!file_exists($location)) :
-            throw new \Exception(
+            throw new Exception(
                 sprintf(
                     "The file <code>%s</code> does not exist, or is inaccessible.\n",
                     $location
@@ -139,7 +140,7 @@ class Mnemosyne
     private function getDefault($key)
     {
         if (!isset($this->defaults[$key])) :
-            throw new \Exception(
+            throw new Exception(
                 sprintf(
                     "The key <code>%s</code> does not exist.\n",
                     $key
@@ -174,20 +175,20 @@ class Mnemosyne
      */
     public function remember($key, $override, $validate = false)
     {
-        if (!(is_string($override) || is_int($override) || is_array($override))) :
-            throw new \Exception(
+        if (!is_bool($override) && !(is_string($override) || is_int($override) || is_array($override))) :
+            throw new Exception(
                 "The supplied override is not an acceptable type (string, int, or array).\n"
             );
         endif;
 
         if (!is_string($key)) :
-            throw new \Exception(
+            throw new Exception(
                 "The supplied key is not a string.\n"
             );
         endif;
 
         if (!$this->checkKey($key)) :
-            throw new \Exception(
+            throw new Exception(
                 sprintf(
                     "The key %s is not a valid key (only alphanumeric and underscores allowed).\n",
                     $key

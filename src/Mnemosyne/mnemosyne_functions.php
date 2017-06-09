@@ -1,7 +1,7 @@
-<?php namespace Murmur\WP\Mnemosyne;
+<?php
 
-use Mnemosyne;
-use MnemosyneException;
+use \Exception;
+use \Murmur\WP\Mnemosyne\Mnemosyne;
 
 /**
  * Return the value for the key.
@@ -13,7 +13,7 @@ function __m($key, $override, $validation = false)
     $Mnemosyne = new Mnemosyne;
     try {
         $value = $Mnemosyne->remember($key, $override, $validation = false);
-    } catch (MnemosyneException $mError) {
+    } catch (Exception $mError) {
         $GLOBALS['Murmur_WP_Mnemosyne_default_errors'][] = $mError->getMessage();
         $value = null;
     }
