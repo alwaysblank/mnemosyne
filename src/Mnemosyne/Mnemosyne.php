@@ -10,10 +10,10 @@
  *
  * PHP version 7
  *
- * @package  Murmur\WP\Mnemosyne
- * @author   Squiz Pty Ltd <products@squiz.net>
- * @link     https://bitbucket.org/murmurcreative/mnemosyne
- * @since    0.0.1
+ *  @package  Murmur\WP\Mnemosyne
+ *  @author   Squiz Pty Ltd <products@squiz.net>
+ *  @link     https://bitbucket.org/murmurcreative/mnemosyne
+ *  @since    0.0.1
  */
 
 namespace Murmur\WP\Mnemosyne;
@@ -25,8 +25,8 @@ use \Hipparchus\Pocketknife;
 /**
  * Contains the core Mnemosyne functionality.
  *
- * @author   Ben Martinez-Bateman <ben@murmurcreative.com>
- * @since    0.0.1
+ *  @author   Ben Martinez-Bateman <ben@murmurcreative.com>
+ *  @since    0.0.1
  */
 class Mnemosyne
 {
@@ -48,23 +48,45 @@ class Mnemosyne
     private $cache_key = 'Murmur_WP_Mnemosyne_default_cache';
 
 
+    /**
+     * Construct a Mnemosyne.
+     *
+     *  @return     void
+     */
     public function __construct()
     {
-        /*
-        * Load defaults.
-         */
-        $location = \locate_template(
-            apply_filters(
-                'Murmur/WP/Mnemosyne/storage_location',
-                'defaults.mnemosyne.yaml'
-            )
-        );
-
-        if ($location != '') :
-            $this->storage_location = $location;
-        endif;
+        try {
+            $this->storage_location = $this->findStorage();
+        } catch (Exception $storageError) {
+            $this->handleException($storageError);
+        }
 
         $this->defaults = $this->retrieveDefaults();
+    }
+
+    /**
+     * Attempt to locate defaults file.
+     *
+     *  @return     string
+     */
+    private function findStorage()
+    {
+        $path = apply_filters(
+            'Murmur/WP/Mnemosyne/storage_location',
+            'defaults.mnemosyne.yaml'
+        );
+        $location = locate_template($path);
+        if ($location === '') :
+            throw new Exception(
+                sprintf(
+                    "Could not find a file to load at <code>%s</code>.\n",
+                    $path
+                )
+            );
+            return false;
+        else :
+            return $location;
+        endif;
     }
 
 
@@ -73,6 +95,9 @@ class Mnemosyne
      *
      * Just a wrapper, in case we want to modify exception
      * handling across the class (i.e. suppress it).
+     *
+     *  @param      object[Exception]   $Exception
+     *  @return     string
      */
     private function handleException($Exception)
     {
@@ -86,6 +111,8 @@ class Mnemosyne
      * Using this method allows us to check to see if the
      * defaults have already been loaded to avoid multiple
      * calls to the filesystem.
+     *
+     *  @return     mixed|bool
      */
     private function retrieveDefaults()
     {
@@ -110,8 +137,8 @@ class Mnemosyne
  *
  * Throws an Exception if the file does not exist.
  *
- * @param  string
- * @return array
+ *  @param  string
+ *  @return array
  */
     private function loadFile($location)
     {
@@ -134,8 +161,8 @@ class Mnemosyne
      *
      * Throws an exception if the key does not exist.
      *
-     * @param   string
-     * @returns string|bool
+     *  @param   string
+     *  @return string|bool
      */
     private function getDefault($key)
     {
@@ -156,8 +183,8 @@ class Mnemosyne
     /**
      * Check keys to make sure they're valid as PHP array keys.
      *
-     * @param  string $key
-     * @return boolean|string
+     *  @param  string $key
+     *  @return boolean|string
      */
     private function checkKey($key)
     {
@@ -168,10 +195,10 @@ class Mnemosyne
     /**
      * Get the appropriate default or override for a key.
      *
-     * @param  string               $key
-     * @param  string|array|integer $override
-     * @param  string               $validate
-     * @return string|array|integer
+     *  @param  string               $key
+     *  @param  string|array|integer $override
+     *  @param  string               $validate
+     *  @return string|array|integer
      */
     public function remember($key, $override, $validate = false)
     {
