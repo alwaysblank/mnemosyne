@@ -18,9 +18,9 @@
 
 namespace Murmur\WP\Mnemosyne;
 
-use \Exception;
-use \Symfony\Component\Yaml\Parser;
-use \Hipparchus\Pocketknife;
+use Exception;
+use Symfony\Component\Yaml\Parser;
+use Hipparchus\Pocketknife;
 
 /**
  * Contains the core Mnemosyne functionality.

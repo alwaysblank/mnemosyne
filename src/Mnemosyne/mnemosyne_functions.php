@@ -16,8 +16,7 @@
  *  @since    0.1.0
  */
 
-use \Exception;
-use \Murmur\WP\Mnemosyne\Mnemosyne;
+use Murmur\WP\Mnemosyne\Mnemosyne;
 
 /**
  * Return the value for the key.
