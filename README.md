@@ -17,7 +17,7 @@ Set your defaults by creating a file called `defaults.mnemosyne.yaml` in `[theme
 
 If you want to place your defaults.yaml file somewhere else, or name it something else, you can use the filter `Murmur/WP/Mnemosyne/storage_location` to pass in a new location. Keep in mind that this value is passed to WordPress's `locate_template()` to get its location.
 
-#### __m()
+### __m()
 
 `__m($key_name, $data_source [, $validation_function])`
 
@@ -35,7 +35,7 @@ The data source that should be checked for an override. If this evaluates to a f
 
 An optional callback. This is the name of a function that, if defined, will be called and passed the evaluated result of $data_source as well as the $key_name. It should return either a falsy value (ideally bool false), or the result of $data_source.
 
-#### __me()
+### __me()
 
 `__me($key_name, $data_source [, $validation_function])`
 
@@ -43,6 +43,6 @@ This function behaves identially to `__m()`, except that it echos the value.
 
 **Note:** Attempting to retrieve a value that is not echoable (i.e. not a string or numeric value) will throw an exception.
 
-#### Others
+### Others
 
 See `src/Mnemosyne/mnemosyne_functions.php` for other functions and their documentation. Includes some tools for looking at errors and checking for overrides.
