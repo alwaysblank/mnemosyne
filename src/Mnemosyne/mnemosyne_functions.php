@@ -14,7 +14,7 @@ function __m($key, $override, $validation = false)
     try {
         $value = $Mnemosyne->remember($key, $override, $validation = false);
     } catch (Exception $mError) {
-        $GLOBALS['Murmur_WP_Mnemosyne_default_errors'][] = $mError->getMessage();
+        $GLOBALS['Murmur_WP_Mnemosyne_errors'][] = $mError->getMessage();
         $value = null;
     }
     return $value;
@@ -27,5 +27,19 @@ function __m($key, $override, $validation = false)
  */
 function __me($key, $override, $validation = false)
 {
-    echo __m($key, $override, $validation = false);
+    try {
+        $value = __m($key, $override, $validation = false);
+        if (!(is_string($value) || is_numeric($value))) :
+            throw new Exception(
+                sprintf(
+                    "The value for key <code>%s</code> cannot be converted to a string.\n",
+                    $key
+                )
+            );
+        else :
+            echo $value;
+        endif;
+    } catch (Exception $echoError) {
+        $GLOBALS['Murmur_WP_Mnemosyne_errors'][] = $echoError->getMessage();
+    }
 }
