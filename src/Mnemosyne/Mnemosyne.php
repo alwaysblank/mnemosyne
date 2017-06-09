@@ -18,7 +18,6 @@
 
 namespace Murmur\WP\Mnemosyne;
 
-use MnemosyneException;
 use \Symfony\Component\Yaml\Parser;
 use \Hipparchus\Pocketknife;
 
@@ -94,7 +93,7 @@ class Mnemosyne
         elseif ($this->storage_location) :
             try {
                 $defaults = $this->loadFile($this->storage_location);
-            } catch (MnemosyneException $fileError) {
+            } catch (\Exception $fileError) {
                 $this->handleException($fileError);
             }
 
@@ -116,7 +115,7 @@ class Mnemosyne
     private function loadFile($location)
     {
         if (!file_exists($location)) :
-            throw new MnemosyneException(
+            throw new \Exception(
                 sprintf(
                     "The file <code>%s</code> does not exist, or is inaccessible.\n",
                     $location
@@ -140,7 +139,7 @@ class Mnemosyne
     private function getDefault($key)
     {
         if (!isset($this->defaults[$key])) :
-            throw new MnemosyneException(
+            throw new \Exception(
                 sprintf(
                     "The key <code>%s</code> does not exist.\n",
                     $key
@@ -176,19 +175,19 @@ class Mnemosyne
     public function remember($key, $override, $validate = false)
     {
         if (!(is_string($override) || is_int($override) || is_array($override))) :
-            throw new MnemosyneException(
+            throw new \Exception(
                 "The supplied override is not an acceptable type (string, int, or array).\n"
             );
         endif;
 
         if (!is_string($key)) :
-            throw new MnemosyneException(
+            throw new \Exception(
                 "The supplied key is not a string.\n"
             );
         endif;
 
         if (!$this->checkKey($key)) :
-            throw new MnemosyneException(
+            throw new \Exception(
                 sprintf(
                     "The key %s is not a valid key (only alphanumeric and underscores allowed).\n",
                     $key
