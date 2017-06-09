@@ -1,5 +1,6 @@
-## v0.0.1
+## v0.1.0
 
-Initial Release!
+Initial developement release.
 
-  * ????
+  * Implements the basic, core functionality in a class.
+  * Added conveninence functions (`__m()` & `__me()` ).
