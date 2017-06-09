@@ -25,7 +25,7 @@ function __m($key, $override, $validation = false)
  *
  * @see     Murmur\WP\Mnemosyne\__m()
  */
-function __mE($key, $override, $validation = false)
+function __me($key, $override, $validation = false)
 {
     echo __m($key, $override, $validation = false);
 }
