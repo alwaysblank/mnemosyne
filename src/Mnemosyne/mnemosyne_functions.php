@@ -21,9 +21,10 @@ use Murmur\WP\Mnemosyne\Mnemosyne;
 /**
  * Return the value for the key.
  *
- *  @since    0.1.1
- *  @see     Murmur\WP\Mnemosyne::remember()
- *  @return   mixed
+ * @since      0.1.1
+ * @see        Murmur\WP\Mnemosyne::remember()
+ *
+ * @return     mixed
  */
 function mns_get_value($key, $override, $validation = false)
 {
@@ -40,9 +41,10 @@ function mns_get_value($key, $override, $validation = false)
 /**
  * i18n-y alias for mns_get_value().
  *
- *  @since    0.1.0
- *  @see      Murmur\WP\Mnemosyne\mns_get_value()
- *  @return   mixed
+ * @since      0.1.0
+ * @see        Murmur\WP\Mnemosyne\mns_get_value()
+ *
+ * @return     mixed
  */
 function __m($key, $override, $validation = false)
 {
@@ -52,9 +54,11 @@ function __m($key, $override, $validation = false)
 /**
  * i18n-y alias for echoing mns_get_value().
  *
- *  @since    0.1.0
- *  @see      Murmur\WP\Mnemosyne\mns_get_value()
- *  @return   void
+ * @since      0.1.0
+ * @see        Murmur\WP\Mnemosyne\mns_get_value()
+ * @return     string
+ *
+ * @throws     Exception  (description)
  */
 function __me($key, $override, $validation = false)
 {
@@ -78,14 +82,15 @@ function __me($key, $override, $validation = false)
 /**
  * Get the default value without checking for an override.
  *
- * In some rare cases, you may want to get the default value without,
- * checking to see if an override is in place (for instance, to check
- * whether or not an override exists by comparison). This function
- * bypasses the override check.
+ * In some rare cases, you may want to get the default value without, checking
+ * to see if an override is in place (for instance, to check whether or not an
+ * override exists by comparison). This function bypasses the override check.
  *
- *  @since    0.1.1
- *  @param      string  $key
- *  @return     mixed
+ * @since      0.1.1
+ *
+ * @param      string  $key
+ *
+ * @return     mixed
  */
 function mns_get_default($key)
 {
@@ -95,9 +100,10 @@ function mns_get_default($key)
 /**
  * Check to see if a key is being overridden.
  *
- *  @since    0.1.1
- *  @see      Murmur\WP\Mnemosyne\mns_get_value()
- *  @return   bool
+ * @since      0.1.1
+ * @see        Murmur\WP\Mnemosyne\mns_get_value()
+ *
+ * @return     bool
  */
 function mns_is_overridden($key, $override, $validation = false)
 {
@@ -114,11 +120,11 @@ function mns_is_overridden($key, $override, $validation = false)
 /**
  * Reports any errors w/ conveience functions. DEBUG ONLY.
  *
- * If there are any errors stored in the Mnemosyne global
- * error cache, this prints them out nicely.
+ * If there are any errors stored in the Mnemosyne global error cache, this
+ * prints them out nicely.
  *
- *  @since      0.1.1
- *  @return     string|void
+ * @since      0.1.1
+ * @return     string|void
  */
 function mns_print_errors()
 {
@@ -129,4 +135,44 @@ function mns_print_errors()
         endforeach;
         echo '</ul>';
     endif;
+}
+
+/**
+ * Dig up a value from a multidimensional array.
+ *
+ * Pass the keys for your array as additional arguments (as many as you want)
+ * following $override. Like so:
+ *
+ * `mns_dig('key', override_source(), 'users', 0, 'name')`
+ *
+ * This function does not allow you to pass a custom validation function. If you
+ * want to do any validation, it'll need to be done manually on the returned
+ * value.
+ *
+ * @since      0.1.2
+ * @see        Murmur\WP\Mnemosyne::remember()
+ *
+ * @param      string      $key       The key.
+ * @param      mixed       $override  The override.
+ * @param      mixed       $layers    Array keys in order.
+ *
+ * @return     mixed|bool  Returns a value from the array if it can, False if it cannot.
+ */
+function mns_dig($key, $override, ...$layers)
+{
+    $initial = mns_get_value($key, $override);
+
+    $value = array_reduce($layers, function ($carry, $item) {
+        if ($carry === false) :
+            return false;
+        endif;
+
+        if (isset($carry[$item])) :
+            return $carry[$item];
+        else :
+            return false;
+        endif;
+    }, $initial);
+
+    return $value;
 }
