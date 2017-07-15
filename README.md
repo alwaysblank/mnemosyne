@@ -9,13 +9,13 @@ Named for the [Greek Titan of memory](https://simple.wikipedia.org/wiki/Mnemosyn
 
 It is recommended that you use Mnemosyne's convenience functions instead of accessing `Mnemosyne` directly.
 
-These functions fail silently but throw exceptions when they do. Currently these exceptions are not displayed, but are stored in the PHP $GLOBALS variable: `$GLOBALS['Murmur_WP_Mnemosyne_errors']`
+These functions fail silently but throw exceptions when they do. Currently these exceptions are not displayed, but are stored in the PHP $GLOBALS variable: `$GLOBALS['AlwaysBlank_WP_Mnemosyne_errors']`
 
 ### Defaults
 
-Set your defaults by creating a file called `defaults.mnemosyne.yaml` in `[theme]/resources/` (assuming you are using Sage 9.x). Currently Mnemosyne supports basic key:value pairs, including values that are more complex data types, such as arrays. Keys support only alphanumeric characters and underscores.
+Set your defaults by creating a file called `defaults.mnemosyne.yaml` in `[theme]/resources/` (assuming you are using Sage 9.x). Currently Mnemosyne supports basic `key:value` pairs, including values that are more complex data types, such as arrays. Keys support only alphanumeric characters and underscores.
 
-If you want to place your defaults.yaml file somewhere else, or name it something else, you can use the filter `Murmur/WP/Mnemosyne/storage_location` to pass in a new location. Keep in mind that this value is passed to WordPress's `locate_template()` to get its location.
+If you want to place your defaults.yaml file somewhere else, or name it something else, you can use the filter `AlwaysBlank/WP/Mnemosyne/storage_location` to pass in a new location. Keep in mind that this value is passed to WordPress's `locate_template()` to get its location.
 
 ### __m()
 

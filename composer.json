@@ -4,7 +4,7 @@
     "authors": [
         {
             "name": "Ben Bateman",
-            "email": "ben@murmurcreative.com"
+            "email": "ben@alwaysblank.org"
         }
     ],
     "require": {
@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Murmur\\WP\\": "src/"
+            "AlwaysBlank\\WP\\": "src/"
         },
         "files": ["src/Mnemosyne/mnemosyne_functions.php"]
     }

@@ -8,15 +8,15 @@
  * to be described in depth in a theme’s code but easily overridden
  * by a user if necessary.
  *
- * PHP version 7
+ * PHP version 5.6
  *
- *  @package  Murmur\WP\Mnemosyne
- *  @author   Ben Martinez-Bateman <ben@murmurcreative.com>
- *  @link     https://bitbucket.org/murmurcreative/mnemosyne
- *  @since    0.1.0
+ *  @package  AlwaysBlank\WP\Mnemosyne
+ *  @author   Ben Martinez-Bateman <ben@alwaysblank.org>
+ *  @link     https://github.com/alwaysblank/mnemosyne
+ *  @since    0.1.3
  */
 
-namespace Murmur\WP\Mnemosyne;
+namespace AlwaysBlank\WP\Mnemosyne;
 
 use Exception;
 use Symfony\Component\Yaml\Parser;
@@ -47,7 +47,7 @@ class Mnemosyne
      * Name of the $GLOBALS key that will contain
      * loaded defaults.
      */
-    private $cache_key = 'Murmur_WP_Mnemosyne_default_cache';
+    private $cache_key = 'AlwaysBlank_WP_Mnemosyne_default_cache';
 
     /**
      * Set to bool true to throw Exceptions instead of

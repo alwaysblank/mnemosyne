@@ -10,19 +10,19 @@
  *
  * PHP version 7
  *
- *  @package  Murmur\WP\Mnemosyne
+ *  @package  AlwaysBlank\WP\Mnemosyne
  *  @author   Squiz Pty Ltd <products@squiz.net>
  *  @link     https://bitbucket.org/murmurcreative/mnemosyne
  *  @since    0.1.0
  */
 
-use Murmur\WP\Mnemosyne\Mnemosyne;
+use AlwaysBlank\WP\Mnemosyne\Mnemosyne;
 
 /**
  * Return the value for the key.
  *
  * @since      0.1.1
- * @see        Murmur\WP\Mnemosyne::remember()
+ * @see        AlwaysBlank\WP\Mnemosyne::remember()
  *
  * @return     mixed
  */
@@ -32,7 +32,7 @@ function mns_get_value($key, $override, $validation = false)
     try {
         $value = $Mnemosyne->remember($key, $override, $validation);
     } catch (Exception $mError) {
-        $GLOBALS['Murmur_WP_Mnemosyne_errors'][] = $mError->getMessage();
+        $GLOBALS['AlwaysBlank_WP_Mnemosyne_errors'][] = $mError->getMessage();
         $value = null;
     }
     return $value;
@@ -42,7 +42,7 @@ function mns_get_value($key, $override, $validation = false)
  * i18n-y alias for mns_get_value().
  *
  * @since      0.1.0
- * @see        Murmur\WP\Mnemosyne\mns_get_value()
+ * @see        AlwaysBlank\WP\Mnemosyne\mns_get_value()
  *
  * @return     mixed
  */
@@ -55,7 +55,7 @@ function __m($key, $override, $validation = false)
  * i18n-y alias for echoing mns_get_value().
  *
  * @since      0.1.0
- * @see        Murmur\WP\Mnemosyne\mns_get_value()
+ * @see        AlwaysBlank\WP\Mnemosyne\mns_get_value()
  * @return     string
  *
  * @throws     Exception  (description)
@@ -75,7 +75,7 @@ function __me($key, $override, $validation = false)
             echo $value;
         endif;
     } catch (Exception $echoError) {
-        $GLOBALS['Murmur_WP_Mnemosyne_errors'][] = $echoError->getMessage();
+        $GLOBALS['AlwaysBlank_WP_Mnemosyne_errors'][] = $echoError->getMessage();
     }
 }
 
@@ -101,7 +101,7 @@ function mns_get_default($key)
  * Check to see if a key is being overridden.
  *
  * @since      0.1.1
- * @see        Murmur\WP\Mnemosyne\mns_get_value()
+ * @see        AlwaysBlank\WP\Mnemosyne\mns_get_value()
  *
  * @return     bool
  */
@@ -128,9 +128,9 @@ function mns_is_overridden($key, $override, $validation = false)
  */
 function mns_print_errors()
 {
-    if (isset($GLOBALS['Murmur_WP_Mnemosyne_errors'])) :
+    if (isset($GLOBALS['AlwaysBlank_WP_Mnemosyne_errors'])) :
         echo '<ul class="mns_error_report">';
-        foreach ($GLOBALS['Murmur_WP_Mnemosyne_errors'] as $error) :
+        foreach ($GLOBALS['AlwaysBlank_WP_Mnemosyne_errors'] as $error) :
             printf('<li class="mns_error_description">%s</li>', $error);
         endforeach;
         echo '</ul>';
@@ -150,7 +150,7 @@ function mns_print_errors()
  * value.
  *
  * @since      0.1.2
- * @see        Murmur\WP\Mnemosyne::remember()
+ * @see        AlwaysBlank\WP\Mnemosyne::remember()
  *
  * @param      string      $key       The key.
  * @param      mixed       $override  The override.

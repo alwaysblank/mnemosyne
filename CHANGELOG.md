@@ -21,3 +21,9 @@ Added the ability to dig into values.
 
 	* `mns_dig()` gives the user the ability to return a specific value from a queried array.
 	* Some documentation cleanup.
+
+## v0.1.3
+
+Namespace changed.
+
+	* Namespace changed from Murmur -> AlwaysBlank to reflect move to public, open-source development.
