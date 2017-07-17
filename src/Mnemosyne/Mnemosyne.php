@@ -20,6 +20,7 @@ namespace AlwaysBlank\WP\Mnemosyne;
 
 use Exception;
 use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Finder\Finder;
 use Hipparchus\Pocketknife;
 
 /**
@@ -35,6 +36,11 @@ class Mnemosyne
      *  @since    0.1.0
      */
     private $storage_location = false;
+
+    /**
+     * Filename of the file that contains our defaults.
+     */
+    private $storage_file = 'defaults.mnemosyne.yaml';
 
     /**
      * Property that contains defaults once loaded.
@@ -59,7 +65,7 @@ class Mnemosyne
     /**
      * Construct a Mnemosyne.
      *
-     *  @since    0.1.0
+     *  @since    0.1.4
      *  @return     void
      */
     public function __construct($settings = [])
@@ -70,7 +76,7 @@ class Mnemosyne
             $this->handleException($storageError);
         }
 
-        $this->defaults = $this->retrieveDefaults();
+        $this->defaults = $this->loadDefaults();
 
         try {
             $this->applySettings($settings);
@@ -103,13 +109,13 @@ class Mnemosyne
     /**
      * Attempt to locate defaults file.
      *
-     *  @since      0.1.0
+     *  @since      0.1.4
      *  @return     string
      */
     private function findStorage()
     {
         $path = apply_filters(
-            'Murmur/WP/Mnemosyne/storage_location',
+            'AlwaysBlank/WP/Mnemosyne/storage_location',
             'defaults.mnemosyne.yaml'
         );
         $location = locate_template($path);
@@ -124,6 +130,49 @@ class Mnemosyne
         else :
             return $location;
         endif;
+    }
+
+
+    private function validateStorage($file)
+    {
+        $parsed = $this->loadFile($file);
+
+        try {
+            $parsed = $this->loadFile($file);
+        } catch (Exception $validateError) {
+            $this->handleException($validateError);
+        }
+
+        if (is_array($parsed) && !is_empty($parsed)) :
+            return $file;
+        else :
+          throw new Exception(
+                sprintf(
+                    "The file <code>%s</code> contained nothing, or its content could not be loaded.",
+                    $file
+                )
+            );
+            return false; 
+        endif; 
+    }
+
+    /**
+     * Loads storage file.
+     * 
+     * @since   0.1.4
+     */
+    private function loadStorage($file)
+    {
+        if ($parsed = $this->validateStorage($file)) :
+            $combined = $this->defaults + $parsed;
+            $this->defaults = $combined;
+
+            if (json_encode($combined) === json_encode($this->defaults)) :
+                return true;
+            endif;
+        endif;
+
+        return false;
     }
 
 
@@ -154,14 +203,14 @@ class Mnemosyne
      * defaults have already been loaded to avoid multiple
      * calls to the filesystem.
      *
-     *  @since      0.1.0
+     *  @since      0.1.4
      *  @return     mixed|bool
      */
-    private function retrieveDefaults()
+    private function loadDefaults()
     {
         if (isset($GLOBALS[$this->cache_key])) :
             return $GLOBALS[$this->cache_key];
-        elseif ($this->storage_location) :
+        else :
             try {
                 $defaults = $this->loadFile($this->storage_location);
             } catch (Exception $fileError) {
