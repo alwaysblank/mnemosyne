@@ -193,7 +193,7 @@ class Mnemosyne
 
         // We passed in a file path, so trust it.
         else :
-          $location = trailingslashit($file['path']) . $file('name');
+          $location = trailingslashit($file['path']) . $file['name'];
         endif;
 
         // Make double sure the file exists.
