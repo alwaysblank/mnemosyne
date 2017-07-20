@@ -27,3 +27,12 @@ Added the ability to dig into values.
 Namespace changed.
 
   * Namespace changed from `Murmur` -> `AlwaysBlank` to reflect move to public, open-source development.
+
+## v0.1.4
+
+Added capability to change the filename and path. Also makes the defaults files location theme-agnostic: It will search for the file instead of only looking in a hard-coded location.
+
+  * Filters for file name, file path, and file search object.
+  * Added file search method to look for file if it isn't found at the default location.
+  * Split out functionality into more limited methods.
+  * Refactored certain behaviors in anticipation of multi-file import functionality (see: #3).
