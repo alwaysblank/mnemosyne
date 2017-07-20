@@ -44,7 +44,7 @@ This function returns a value from the defaults or source, as appropriate.
 
 `$key_name`
 
-The key for the value we want. They key will be used to look up a default.
+The key for the value we want. The key will be used to look up a default.
  
 `$data_source`
 
@@ -52,7 +52,7 @@ The data source that should be checked for an override. If this evaluates to a f
  
 `$validation_function`
 
-An optional callback. This is the name of a function that, if defined, will be called and passed the evaluated result of $data_source as well as the $key_name. It should return either a falsy value (ideally bool false), or the result of $data_source.
+An optional callback. This is the name of a function that, if defined, will be called and passed the evaluated result of $data_source as well as the $key_name. It should return either a falsy value (ideally Boolean `false`), or the result of $data_source.
 
 ### __me()
 
