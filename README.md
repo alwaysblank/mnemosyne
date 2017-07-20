@@ -18,7 +18,7 @@ If you would like to place it somewhere else, or avoid the processing cycles nee
   - `AlwaysBlank/WP/Mnemosyne/storage_file` This is the name of the file you want to find. It defaults to `defaults.mnemosyne.yaml`. You can name it whatever you like, but adding the extension `.mnemosyne.yaml` is recommended.
   - `AlwaysBlank/WP/Mnemosyne/storage_path` The **absolute** path to the directory that contains your file (do not include the file name). This value defaults to Boolean `false`, which causes Mnemosyne to search the stylesheet directory as described above.
 
-**Note**: When you pass a path to `AlwaysBlank/WP/Mnemosyne/storage_path` it assumes you are supplying an exact path, and _will not_ perform a search in that directory—it will just concatenate the file path with the file name, and attempt to import the file at that location.
+> **Note**: When you pass a path to `AlwaysBlank/WP/Mnemosyne/storage_path` it assumes you are supplying an exact path, and _will not_ perform a search in that directory—it will just concatenate the file path with the file name, and attempt to import the file at that location.
 
 If you want to modify the way in which Mnemosyne searches for your file, there is a third filter available that allows you to modify the search before it is returned:
 
@@ -60,7 +60,7 @@ An optional callback. This is the name of a function that, if defined, will be c
 
 This function behaves identially to `__m()`, except that it echos the value.
 
-**Note:** Attempting to retrieve a value that is not echoable (i.e. not a string or numeric value) will throw an exception.
+> **Note:** Attempting to retrieve a value that is not echoable (i.e. not a string or numeric value) will throw an exception.
 
 ### Others
 
