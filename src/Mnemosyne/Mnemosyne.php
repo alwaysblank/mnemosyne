@@ -71,7 +71,7 @@ class Mnemosyne
     public function __construct($settings = [])
     {
         try {
-            $this->storage_location = $this->findStorage();
+            $this->storage_location = $this->findStorage($this->storage_file);
         } catch (Exception $storageError) {
             $this->handleException($storageError);
         }
@@ -138,7 +138,7 @@ class Mnemosyne
           // for proper use in child themes. Note that it may
           // cause odd results if your theme adjusts what
           // get_styleshet_directory() returns (i.e. roots/sage).
-          $finder->files()->name($file['name'])->notPath()->in($finder_search_location);
+          $finder->files()->in($finder_search_location)->name($file['name']);
 
           $filtered_finder = apply_filters( 'AlwaysBlank/WP/Mnemosyne/storage_finder', $finder );
 
@@ -159,8 +159,8 @@ class Mnemosyne
           elseif (count($finder_results) > 1) :
             $file_location_list = null;
 
-            foreach ($filtered_finder as $file) :
-              $file_location_list .= "<li>{$file->getRelativePathname()}</li>";
+            foreach ($filtered_finder as $each_file) :
+              $file_location_list .= "<li>{$each_file->getRelativePathname()}</li>";
             endforeach;
             $file_location_list = "<ol>$file_location_list</ol>";
 
@@ -196,10 +196,10 @@ class Mnemosyne
           $location = trailingslashit($file['path']) . $file('name');
         endif;
 
-        // Make sure 
+        // Make double sure the file exists.
+        $test = file_exists($location);
 
-        $location = locate_template($path);
-        if ($location === '') :
+        if (!$test) :
             throw new Exception(
                 sprintf(
                     "Could not find a file to load at <code>%s</code>.",
@@ -298,9 +298,9 @@ class Mnemosyne
             }
 
             return $GLOBALS[$this->cache_key] = $defaults;
-        else :
-            return false;
         endif;
+
+        return false;
     }
 
 
