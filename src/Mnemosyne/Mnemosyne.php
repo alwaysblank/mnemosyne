@@ -20,6 +20,7 @@ namespace AlwaysBlank\WP\Mnemosyne;
 
 use Exception;
 use Symfony\Component\Yaml\Parser;
+use Symfony\Component\Finder\Finder;
 use Hipparchus\Pocketknife;
 
 /**
@@ -35,6 +36,11 @@ class Mnemosyne
      *  @since    0.1.0
      */
     private $storage_location = false;
+
+    /**
+     * Filename of the file that contains our defaults.
+     */
+    private $storage_file = 'defaults.mnemosyne.yaml';
 
     /**
      * Property that contains defaults once loaded.
@@ -59,18 +65,18 @@ class Mnemosyne
     /**
      * Construct a Mnemosyne.
      *
-     *  @since    0.1.0
+     *  @since    0.1.4
      *  @return     void
      */
     public function __construct($settings = [])
     {
         try {
-            $this->storage_location = $this->findStorage();
+            $this->storage_location = $this->findStorage($this->storage_file);
         } catch (Exception $storageError) {
             $this->handleException($storageError);
         }
 
-        $this->defaults = $this->retrieveDefaults();
+        $this->defaults = $this->loadDefaults();
 
         try {
             $this->applySettings($settings);
@@ -103,17 +109,117 @@ class Mnemosyne
     /**
      * Attempt to locate defaults file.
      *
-     *  @since      0.1.0
-     *  @return     string
+     * If not explicit path is set using the
+     * `AlwaysBlank/WP/Mnemosyne/storage_path` filter, Mnemosyne will assume you
+     * might be using the default file location, and check there before
+     * searching elsewhere. This *could* lead to odd behavior if you are using a
+     * file in a different location and don't delete the default one.
+     *
+     * @since      0.1.4
+     *
+     * @param      string          $filename  The name of the file we're looking
+     *                                        for.
+     *
+     * @throws     Exception       File couldn't be found.
+     * @throws     Exception       Too many files found.
+     *
+     * @return     string|boolean  Aboslute path to file if it exists, False if it does not.
      */
-    private function findStorage()
+    private function findStorage($filename)
     {
-        $path = apply_filters(
-            'Murmur/WP/Mnemosyne/storage_location',
-            'defaults.mnemosyne.yaml'
+        $file = array();
+
+        // File name for the file we want to find.
+        $file['name'] = apply_filters(
+            'AlwaysBlank/WP/Mnemosyne/storage_file',
+            $filename
         );
-        $location = locate_template($path);
-        if ($location === '') :
+
+        // File path *not including file name* of the file we
+        // want to find.
+        $file['path'] = apply_filters(
+            'AlwaysBlank/WP/Mnemosyne/storage_path',
+            false
+        );
+
+        if ($file['path'] === false) :
+            $finder = new Finder();
+
+            $finder_search_location = get_stylesheet_directory();
+
+          // If file exists at the default location, use that and
+          // don't bother searching (save a few cycles).
+            if (file_exists(trailingslashit($finder_search_location) . $file['name'])) :
+                $location = trailingslashit($finder_search_location) . $file['name'];
+
+              // If the file doesn't exist, go ahead and search for it.
+            else :
+            // get_stylesheet_directory() is used here to allow
+            // for proper use in child themes. Note that it may
+            // cause odd results if your theme adjusts what
+            // get_styleshet_directory() returns (i.e. roots/sage).
+                $finder->files()->in($finder_search_location)->name($file['name']);
+
+                $filtered_finder = apply_filters('AlwaysBlank/WP/Mnemosyne/storage_finder', $finder);
+
+                $finder_results = iterator_to_array($filtered_finder, false);
+
+            // No files found.
+                if (count($finder_results) < 1) :
+                      throw new Exception(
+                          sprintf(
+                              "Could not find <code>%s</code>. It does not appear to exist in <code>%s</code>.",
+                              $file['name'],
+                              $finder_search_location
+                          )
+                      );
+
+                      return false;
+                elseif (count($finder_results) > 1) :
+                    $file_location_list = null;
+
+                    foreach ($filtered_finder as $each_file) :
+                        $file_location_list .= "<li>{$each_file->getRelativePathname()}</li>";
+                    endforeach;
+                    $file_location_list = "<ol>$file_location_list</ol>";
+
+              // More than one file found.
+                    throw new Exception(
+                        sprintf(
+                            "Found more than one instance of <code>%s</code>. %s",
+                            $file['name'],
+                            $file_location_list
+                        )
+                    );
+
+                    return false;
+
+            // Good file found.
+                elseif (count($finder_results) === 1) :
+                    $location = $finder_results[0]->getRealPath();
+
+            // Should never arrive here.
+                else :
+                    throw new Exception(
+                        sprintf(
+                            "Something went wrong with <code>%s</code>. I'm not sure what.",
+                            $file['name']
+                        )
+                    );
+
+                    return false;
+                endif;
+            endif; // endif for `if (file_exists(default_location))`
+
+        // We passed in a file path, so trust it.
+        else :
+            $location = trailingslashit($file['path']) . $file['name'];
+        endif;
+
+        // Make double sure the file exists.
+        $test = file_exists($location);
+
+        if (!$test) :
             throw new Exception(
                 sprintf(
                     "Could not find a file to load at <code>%s</code>.",
@@ -124,6 +230,49 @@ class Mnemosyne
         else :
             return $location;
         endif;
+    }
+
+
+    private function validateStorage($file)
+    {
+        $parsed = $this->loadFile($file);
+
+        try {
+            $parsed = $this->loadFile($file);
+        } catch (Exception $validateError) {
+            $this->handleException($validateError);
+        }
+
+        if (is_array($parsed) && !is_empty($parsed)) :
+            return $file;
+        else :
+            throw new Exception(
+                sprintf(
+                    "The file <code>%s</code> contained nothing, or its content could not be loaded.",
+                    $file
+                )
+            );
+            return false;
+        endif;
+    }
+
+    /**
+     * Loads storage file.
+     *
+     * @since   0.1.4
+     */
+    private function loadStorage($file)
+    {
+        if ($parsed = $this->validateStorage($file)) :
+            $combined = $this->defaults + $parsed;
+            $this->defaults = $combined;
+
+            if (json_encode($combined) === json_encode($this->defaults)) :
+                return true;
+            endif;
+        endif;
+
+        return false;
     }
 
 
@@ -154,14 +303,14 @@ class Mnemosyne
      * defaults have already been loaded to avoid multiple
      * calls to the filesystem.
      *
-     *  @since      0.1.0
+     *  @since      0.1.4
      *  @return     mixed|bool
      */
-    private function retrieveDefaults()
+    private function loadDefaults()
     {
         if (isset($GLOBALS[$this->cache_key])) :
             return $GLOBALS[$this->cache_key];
-        elseif ($this->storage_location) :
+        else :
             try {
                 $defaults = $this->loadFile($this->storage_location);
             } catch (Exception $fileError) {
@@ -169,9 +318,9 @@ class Mnemosyne
             }
 
             return $GLOBALS[$this->cache_key] = $defaults;
-        else :
-            return false;
         endif;
+
+        return false;
     }
 
 
