@@ -143,78 +143,77 @@ class Mnemosyne
         );
 
         if ($file['path'] === false) :
-          $finder = new Finder();
+            $finder = new Finder();
 
-          $finder_search_location = get_stylesheet_directory();
+            $finder_search_location = get_stylesheet_directory();
 
           // If file exists at the default location, use that and
           // don't bother searching (save a few cycles).
-          if (file_exists(trailingslashit($finder_search_location) . $file['name'])) :
-            $location = trailingslashit($finder_search_location) . $file['name'];
+            if (file_exists(trailingslashit($finder_search_location) . $file['name'])) :
+                $location = trailingslashit($finder_search_location) . $file['name'];
 
-          // If the file doesn't exist, go ahead and search for it.
-          else :
+              // If the file doesn't exist, go ahead and search for it.
+            else :
             // get_stylesheet_directory() is used here to allow
             // for proper use in child themes. Note that it may
             // cause odd results if your theme adjusts what
             // get_styleshet_directory() returns (i.e. roots/sage).
-            $finder->files()->in($finder_search_location)->name($file['name']);
+                $finder->files()->in($finder_search_location)->name($file['name']);
 
-            $filtered_finder = apply_filters( 'AlwaysBlank/WP/Mnemosyne/storage_finder', $finder );
+                $filtered_finder = apply_filters('AlwaysBlank/WP/Mnemosyne/storage_finder', $finder);
 
-            $finder_results = iterator_to_array($filtered_finder, false);
+                $finder_results = iterator_to_array($filtered_finder, false);
 
             // No files found.
-            if (count($finder_results) < 1) :
-              throw new Exception(
-                  sprintf(
-                      "Could not find <code>%s</code>. It does not appear to exist in <code>%s</code>.",
-                      $file['name'],
-                      $finder_search_location
-                  )
-              );
+                if (count($finder_results) < 1) :
+                      throw new Exception(
+                          sprintf(
+                              "Could not find <code>%s</code>. It does not appear to exist in <code>%s</code>.",
+                              $file['name'],
+                              $finder_search_location
+                          )
+                      );
 
-              return false;
+                      return false;
+                elseif (count($finder_results) > 1) :
+                    $file_location_list = null;
 
-            elseif (count($finder_results) > 1) :
-              $file_location_list = null;
-
-              foreach ($filtered_finder as $each_file) :
-                $file_location_list .= "<li>{$each_file->getRelativePathname()}</li>";
-              endforeach;
-              $file_location_list = "<ol>$file_location_list</ol>";
+                    foreach ($filtered_finder as $each_file) :
+                        $file_location_list .= "<li>{$each_file->getRelativePathname()}</li>";
+                    endforeach;
+                    $file_location_list = "<ol>$file_location_list</ol>";
 
               // More than one file found.
-              throw new Exception(
-                  sprintf(
-                      "Found more than one instance of <code>%s</code>. %s",
-                      $file['name'],
-                      $file_location_list
-                  )
-              );
+                    throw new Exception(
+                        sprintf(
+                            "Found more than one instance of <code>%s</code>. %s",
+                            $file['name'],
+                            $file_location_list
+                        )
+                    );
 
-              return false;
+                    return false;
 
             // Good file found.
-            elseif (count($finder_results) === 1) :
-              $location = $finder_results[0]->getRealPath();
+                elseif (count($finder_results) === 1) :
+                    $location = $finder_results[0]->getRealPath();
 
             // Should never arrive here.
-            else :
-              throw new Exception(
-                  sprintf(
-                      "Something went wrong with <code>%s</code>. I'm not sure what.",
-                      $file['name']
-                  )
-              );
+                else :
+                    throw new Exception(
+                        sprintf(
+                            "Something went wrong with <code>%s</code>. I'm not sure what.",
+                            $file['name']
+                        )
+                    );
 
-              return false;
-            endif;
-          endif; // endif for `if (file_exists(default_location))`
+                    return false;
+                endif;
+            endif; // endif for `if (file_exists(default_location))`
 
         // We passed in a file path, so trust it.
         else :
-          $location = trailingslashit($file['path']) . $file['name'];
+            $location = trailingslashit($file['path']) . $file['name'];
         endif;
 
         // Make double sure the file exists.
@@ -247,19 +246,19 @@ class Mnemosyne
         if (is_array($parsed) && !is_empty($parsed)) :
             return $file;
         else :
-          throw new Exception(
+            throw new Exception(
                 sprintf(
                     "The file <code>%s</code> contained nothing, or its content could not be loaded.",
                     $file
                 )
             );
-            return false; 
-        endif; 
+            return false;
+        endif;
     }
 
     /**
      * Loads storage file.
-     * 
+     *
      * @since   0.1.4
      */
     private function loadStorage($file)
