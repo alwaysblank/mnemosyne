@@ -112,12 +112,92 @@ class Mnemosyne
      *  @since      0.1.4
      *  @return     string
      */
-    private function findStorage()
+    private function findStorage($filename)
     {
-        $path = apply_filters(
-            'AlwaysBlank/WP/Mnemosyne/storage_location',
-            'defaults.mnemosyne.yaml'
+        $file = array();
+
+        // File name for the file we want to find.
+        $file['name'] = apply_filters(
+            'AlwaysBlank/WP/Mnemosyne/storage_file',
+            $filename
         );
+
+        // File path *not including file name* of the file we
+        // want to find.
+        $file['path'] = apply_filters(
+            'AlwaysBlank/WP/Mnemosyne/storage_path',
+            false
+        );
+
+        if ($file['path'] === false) :
+          $finder = new Finder();
+
+          $finder_search_location = get_stylesheet_directory();
+
+          // get_stylesheet_directory() is used here to allow
+          // for proper use in child themes. Note that it may
+          // cause odd results if your theme adjusts what
+          // get_styleshet_directory() returns (i.e. roots/sage).
+          $finder->files()->name($file['name'])->notPath()->in($finder_search_location);
+
+          $filtered_finder = apply_filters( 'AlwaysBlank/WP/Mnemosyne/storage_finder', $finder );
+
+          $finder_results = iterator_to_array($filtered_finder, false);
+
+          // No files found.
+          if (count($finder_results) < 1) :
+            throw new Exception(
+                sprintf(
+                    "Could not find <code>%s</code>. It does not appear to exist in <code>%s</code>.",
+                    $file['name'],
+                    $finder_search_location
+                )
+            );
+
+            return false;
+
+          elseif (count($finder_results) > 1) :
+            $file_location_list = null;
+
+            foreach ($filtered_finder as $file) :
+              $file_location_list .= "<li>{$file->getRelativePathname()}</li>";
+            endforeach;
+            $file_location_list = "<ol>$file_location_list</ol>";
+
+            // More than one file found.
+            throw new Exception(
+                sprintf(
+                    "Found more than one instance of <code>%s</code>. %s",
+                    $file['name'],
+                    $file_location_list
+                )
+            );
+
+            return false;
+
+          // Good file found.
+          elseif (count($finder_results) === 1) :
+            $location = $finder_results[0]->getRealPath();
+
+          // Should never arrive here.
+          else :
+            throw new Exception(
+                sprintf(
+                    "Something went wrong with <code>%s</code>. I'm not sure what.",
+                    $file['name']
+                )
+            );
+
+            return false;
+          endif;
+
+        // We passed in a file path, so trust it.
+        else :
+          $location = trailingslashit($file['path']) . $file('name');
+        endif;
+
+        // Make sure 
+
         $location = locate_template($path);
         if ($location === '') :
             throw new Exception(
