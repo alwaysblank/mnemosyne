@@ -62,6 +62,52 @@ This function behaves identially to `__m()`, except that it echos the value.
 
 > **Note:** Attempting to retrieve a value that is not echoable (i.e. not a string or numeric value) will throw an exception.
 
+### mns_dig()
+
+`mns_dig($key_name, $data_source, ...$layers)`
+
+This function returns something from inside a retrieved array, instead of just the entire array.
+
+`$key`
+
+The key for our value. Functions just like `__m()`.
+
+`$data_source`
+
+The source of our override. Functions just like `__m()`.
+
+`...$layers`
+
+A list of comma-separated array keys, dictating the path into the returned array that we want to follow.
+
+#### Example
+
+Let's say the value for the key `some_key` was an array that looked like this:
+
+```php
+[
+  'part_one' => [
+    'person' => 'Jeff',
+    'animal' => 'dog'
+  ],
+  'part_two' => [
+    'spaceship' => 'enterprise'
+  ]
+]
+```
+
+Here are some examples of what `mns_dig()` would return:
+
+```php
+mns_dig('some_key', $data_source, 'part_one', 'animal');
+// 'dog'
+
+mns_dig('some_key', $data_source, 'part_two');
+// ['spaceship' => 'enterprise']
+```
+
+> **Note:** `mns_dig()` does _not_ support a customized validation function like `__m()` or the other functions, because of the way it takes its arguments for array navigation.
+
 ### Others
 
 See `src/Mnemosyne/mnemosyne_functions.php` for other functions and their documentation. Includes some tools for looking at errors and checking for overrides.
