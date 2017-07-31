@@ -11,7 +11,7 @@
  * PHP version 7
  *
  *  @package  AlwaysBlank\WP\Mnemosyne
- *  @author   Squiz Pty Ltd <products@squiz.net>
+ *  @author   Ben Martinez-Bateman <ben@alwaysblank.org>
  *  @link     https://bitbucket.org/murmurcreative/mnemosyne
  *  @since    0.1.0
  */

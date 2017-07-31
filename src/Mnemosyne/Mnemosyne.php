@@ -38,9 +38,10 @@ class Mnemosyne
     private $storage_location = false;
 
     /**
-     * Filename of the file that contains our defaults.
+     * Array containing the name(s) of the files we want to load defaults from.
+     * @since      0.2.0
      */
-    private $storage_file = 'defaults.mnemosyne.yaml';
+    private $storage_files = ['defaults.mnemosyne.yaml'];
 
     /**
      * Property that contains defaults once loaded.
@@ -79,14 +80,14 @@ class Mnemosyne
 
         // Find storage file(s).
         try {
-            $this->storage_location = $this->findStorage($this->storage_file);
+            $this->storage_location = $this->findStorage($this->storage_files);
         } catch (Exception $storageError) {
             $this->handleException($storageError);
         }
 
         // Load defaults from storage.
         if ($this->storage_location) :
-          $this->defaults = $this->loadDefaults($this->storage_location);
+            $this->defaults = $this->loadDefaults($this->storage_location);
         endif;
     }
 
@@ -112,7 +113,40 @@ class Mnemosyne
     }
 
     /**
-     * Attempt to locate defaults file.
+     * Determines the path (if any) for a passed file record, and return an
+     * appropriate array.
+     *
+     * @param      string|array  $file   The record definition.
+     *
+     * @return     array         An array containing the filename and file path (if either exists).
+     */
+    private function processFileRecord($file)
+    {
+        $the_file = [
+        'name' => false,
+        'path' => false
+        ];
+        if (!is_array($file) && is_string($file)) :
+            // Just a filename.
+            $this_file['name'] = $file
+        elseif (is_array($file) && count($file) === 1) :
+        // Just a filename passed in an array; return it.
+            $this_file['name'] = array_shift($file);
+        elseif (is_array($file) && count($file) > 1) :
+        // A filename with path data; concatenate, then return it.
+            $name = array_shift($file);
+            $path = array_reduce($file, function ($carry, $item) {
+                  return $carry . trailingslashit($item);
+            });
+            $this_file['name'] = $name;
+            $this_file['path'] = $path;
+        endif;
+
+        return $the_file;
+    }
+
+    /**
+     * Attempt to locate defaults files.
      *
      * If not explicit path is set using the
      * `AlwaysBlank/WP/Mnemosyne/storage_path` filter, Mnemosyne will assume you
@@ -120,121 +154,132 @@ class Mnemosyne
      * searching elsewhere. This *could* lead to odd behavior if you are using a
      * file in a different location and don't delete the default one.
      *
-     * @since      0.1.4
+     * @since      0.2.0
      *
-     * @param      string          $filename  The name of the file we're looking
-     *                                        for.
+     * @param      array           $filenames  The names of the files we're
+     *                                         looking for.
      *
      * @throws     Exception       File couldn't be found.
-     * @throws     Exception       Too many files found.
+     * @throws     Exception  Too many files found.
      *
      * @return     string|boolean  Aboslute path to file if it exists, False if it does not.
      */
-    private function findStorage($filename)
+    private function findStorage($filenames)
     {
-        $file = array();
+        $locations = array();
 
-        // File name for the file we want to find.
-        $file['name'] = apply_filters(
-            'AlwaysBlank/WP/Mnemosyne/storage_file',
-            $filename
-        );
+        foreach ($filesnames as $this_file) :
+          // Get the name and path, if any.
+            $get_file = $this->processFileRecord($this_file);
 
-        // File path *not including file name* of the file we
-        // want to find.
-        $file['path'] = apply_filters(
-            'AlwaysBlank/WP/Mnemosyne/storage_path',
-            false
-        );
+            $file = array();
 
-        if ($file['path'] === false) :
-            $finder = new Finder();
-
-            $finder_search_location = get_stylesheet_directory();
-
-          // If file exists at the default location, use that and
-          // don't bother searching (save a few cycles).
-            if (file_exists(trailingslashit($finder_search_location) . $file['name'])) :
-                $location = trailingslashit($finder_search_location) . $file['name'];
-
-              // If the file doesn't exist, go ahead and search for it.
-            else :
-            // get_stylesheet_directory() is used here to allow
-            // for proper use in child themes. Note that it may
-            // cause odd results if your theme adjusts what
-            // get_styleshet_directory() returns (i.e. roots/sage).
-                $finder->files()->in($finder_search_location)->name($file['name']);
-
-                $filtered_finder = apply_filters('AlwaysBlank/WP/Mnemosyne/storage_finder', $finder);
-
-                $finder_results = iterator_to_array($filtered_finder, false);
-
-            // No files found.
-                if (count($finder_results) < 1) :
-                      throw new Exception(
-                          sprintf(
-                              "Could not find <code>%s</code>. It does not appear to exist in <code>%s</code>.",
-                              $file['name'],
-                              $finder_search_location
-                          )
-                      );
-
-                      return false;
-                elseif (count($finder_results) > 1) :
-                    $file_location_list = null;
-
-                    foreach ($filtered_finder as $each_file) :
-                        $file_location_list .= "<li>{$each_file->getRelativePathname()}</li>";
-                    endforeach;
-                    $file_location_list = "<ol>$file_location_list</ol>";
-
-              // More than one file found.
-                    throw new Exception(
-                        sprintf(
-                            "Found more than one instance of <code>%s</code>. %s",
-                            $file['name'],
-                            $file_location_list
-                        )
-                    );
-
-                    return false;
-
-            // Good file found.
-                elseif (count($finder_results) === 1) :
-                    $location = $finder_results[0]->getRealPath();
-
-            // Should never arrive here.
-                else :
-                    throw new Exception(
-                        sprintf(
-                            "Something went wrong with <code>%s</code>. I'm not sure what.",
-                            $file['name']
-                        )
-                    );
-
-                    return false;
-                endif;
-            endif; // endif for `if (file_exists(default_location))`
-
-        // We passed in a file path, so trust it.
-        else :
-            $location = trailingslashit($file['path']) . $file['name'];
-        endif;
-
-        // Make double sure the file exists.
-        $test = file_exists($location);
-
-        if (!$test) :
-            throw new Exception(
-                sprintf(
-                    "Could not find a file to load at <code>%s</code>.",
-                    $path
-                )
+          // File name for the file we want to find.
+            $file['name'] = apply_filters(
+                'AlwaysBlank/WP/Mnemosyne/storage_file',
+                $get_file['name']
             );
-            return false;
-        else :
-            return $location;
-        endif;
+
+          // File path *not including file name* of the file we
+          // want to find.
+            $file['path'] = apply_filters(
+                'AlwaysBlank/WP/Mnemosyne/storage_path',
+                $get_file['path']
+            );
+
+          // If we've already checked this path, ignore this file
+            if (in_array(trailingslashit($file['path']) . $file['name'], $locations)) :
+                continue;
+            endif;
+
+            if ($file['path'] === false) :
+                $finder = new Finder();
+
+                $finder_search_location = get_stylesheet_directory();
+
+                // If file exists at the default location, use that and
+                // don't bother searching (save a few cycles).
+                if (file_exists(trailingslashit($finder_search_location) . $file['name'])) :
+                    $location = trailingslashit($finder_search_location) . $file['name'];
+
+                  // If the file doesn't exist, go ahead and search for it.
+                else :
+                  // get_stylesheet_directory() is used here to allow
+                  // for proper use in child themes. Note that it may
+                  // cause odd results if your theme adjusts what
+                  // get_styleshet_directory() returns (i.e. roots/sage).
+                        $finder->files()->in($finder_search_location)->name($file['name']);
+
+                        $filtered_finder = apply_filters('AlwaysBlank/WP/Mnemosyne/storage_finder', $finder);
+
+                        $finder_results = iterator_to_array($filtered_finder, false);
+
+                  // No files found.
+                    if (count($finder_results) < 1) :
+                        throw new Exception(
+                            sprintf(
+                                "Could not find <code>%s</code>. It does not appear to exist in <code>%s</code>.",
+                                $file['name'],
+                                $finder_search_location
+                            )
+                        );
+
+                              continue
+                    elseif (count($finder_results) > 1) :
+                            $file_location_list = null;
+
+                        foreach ($filtered_finder as $each_file) :
+                            $file_location_list .= "<li>{$each_file->getRelativePathname()}</li>";
+                        endforeach;
+                            $file_location_list = "<ol>$file_location_list</ol>";
+
+                    // More than one file found.
+                            throw new Exception(
+                                sprintf(
+                                    "Found more than one instance of <code>%s</code>. %s",
+                                    $file['name'],
+                                    $file_location_list
+                                )
+                            );
+
+                            continue;
+
+                  // Good file found.
+                    elseif (count($finder_results) === 1) :
+                            $location = $finder_results[0]->getRealPath();
+
+                  // Should never arrive here.
+                    else :
+                            throw new Exception(
+                                sprintf(
+                                    "Something went wrong with <code>%s</code>. I'm not sure what.",
+                                    $file['name']
+                                )
+                            );
+
+                            continue;
+                    endif;
+                endif; // endif for `if (file_exists(default_location))`
+
+              // We passed in a file path, so trust it.
+            else :
+                $location = trailingslashit($file['path']) . $file['name'];
+            endif;
+
+          // Make double sure the file exists.
+            $test = file_exists($location);
+
+            if (!$test) :
+                throw new Exception(
+                    sprintf(
+                        "Could not find a file to load at <code>%s</code>.",
+                        $path
+                    )
+                );
+            else :
+                $locations[] = $location;
+            endif;
+        endforeach;
     }
 
 
@@ -316,11 +361,15 @@ class Mnemosyne
         if (isset($GLOBALS[$this->cache_key])) :
             return $GLOBALS[$this->cache_key];
         else :
-            try {
-                $defaults = $this->loadFile($storage_location);
-            } catch (Exception $fileError) {
-                $this->handleException($fileError);
-            }
+            $defaults = array();
+
+            foreach ($storage_location as $location) :
+                try {
+                    $defaults = $defaults + $this->loadFile($location);
+                } catch (Exception $fileError) {
+                    $this->handleException($fileError);
+                }
+            endforeach;
 
             return $GLOBALS[$this->cache_key] = $defaults;
         endif;
