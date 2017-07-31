@@ -65,24 +65,29 @@ class Mnemosyne
     /**
      * Construct a Mnemosyne.
      *
-     *  @since    0.1.4
+     *  @since    0.2.0
      *  @return     void
      */
     public function __construct($settings = [])
     {
+        // Apply settings
+        try {
+            $this->applySettings($settings);
+        } catch (Exception $settingsError) {
+            $this->handleException($settingsError);
+        }
+
+        // Find storage file(s).
         try {
             $this->storage_location = $this->findStorage($this->storage_file);
         } catch (Exception $storageError) {
             $this->handleException($storageError);
         }
 
-        $this->defaults = $this->loadDefaults();
-
-        try {
-            $this->applySettings($settings);
-        } catch (Exception $settingsError) {
-            $this->handleException($settingsError);
-        }
+        // Load defaults from storage.
+        if ($this->storage_location) :
+          $this->defaults = $this->loadDefaults($this->storage_location);
+        endif;
     }
 
     /**
@@ -303,16 +308,16 @@ class Mnemosyne
      * defaults have already been loaded to avoid multiple
      * calls to the filesystem.
      *
-     *  @since      0.1.4
+     *  @since      0.2.0
      *  @return     mixed|bool
      */
-    private function loadDefaults()
+    private function loadDefaults($storage_location)
     {
         if (isset($GLOBALS[$this->cache_key])) :
             return $GLOBALS[$this->cache_key];
         else :
             try {
-                $defaults = $this->loadFile($this->storage_location);
+                $defaults = $this->loadFile($storage_location);
             } catch (Exception $fileError) {
                 $this->handleException($fileError);
             }
