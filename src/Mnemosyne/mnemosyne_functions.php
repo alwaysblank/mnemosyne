@@ -176,3 +176,30 @@ function mns_dig($key, $override, ...$layers)
 
     return $value;
 }
+
+/**
+ * Return value from override *OR* dig into a Mnemosyne
+ * default array to return a value.
+ *
+ * Use this when your override returns an unnested value,
+ * but Mnemosyne defaults for this key are nested.
+ *
+ * `mns_dig()` assumes that the override and default have
+ * identical array structures. This is fequently not the
+ * case. `mns_burrow()` addresses that, by returning the
+ * override value, if it exists, and then digging into
+ * the default only if the override is false.
+ *
+ * @param string $key
+ * @param mixed $override
+ * @param mixed ...$layers
+ * @return mixed|bool
+ */
+function mns_burrow($key, $override, ...$layers)
+{
+    if (mns_is_overridden($key, $override)) {
+        return mns_get_value($key, $override);
+    } else {
+        return mns_dig($key, $override, ...$layers);
+    }
+}
